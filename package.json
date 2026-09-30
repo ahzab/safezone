@@ -1,0 +1,11 @@
+{
+  "name": "safezone",
+  "private": true,
+  "description": "Safe zone checker for TikTok, Instagram Reels and YouTube Shorts",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8765",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
