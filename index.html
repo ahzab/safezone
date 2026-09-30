@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safe Zone Checker for TikTok, Reels and Shorts (with the Arabic layout)</title>
+<meta name="description" content="Drop in a video or image and see which parts TikTok, Instagram Reels and YouTube Shorts cover. Includes TikTok's Arabic right-to-left layout. Free, nothing is uploaded.">
+<style>
+:root{--bg:#0e1116;--panel:#171b22;--line:#2a303a;--text:#e9edf3;--mute:#98a2b3;--accent:#25d0a5;--bad:#ff4d5e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,Arial,sans-serif;line-height:1.45}
+.wrap{max-width:1060px;margin:0 auto;padding:22px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+h1{font-size:clamp(22px,3.4vw,32px);line-height:1.15;letter-spacing:-.5px}
+.sub{color:var(--mute);margin-top:6px;max-width:60ch}
+button,.btn{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 14px;cursor:pointer}
+button:hover,.btn:hover{border-color:#47505e}
+button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#06251d;font-weight:700}
+button.primary{background:var(--accent);border-color:var(--accent);color:#06251d;font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.stage{position:relative;aspect-ratio:9/16;background:#05070a;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+canvas{width:100%;height:100%;display:block}
+.drop{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;color:var(--mute)}
+.drop strong{color:var(--text);font-size:18px}
+.stage.over{outline:3px dashed var(--accent);outline-offset:-8px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--mute);margin-bottom:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+label.rng{display:flex;align-items:center;gap:10px;color:var(--mute);margin-top:12px}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.key{display:flex;gap:16px;flex-wrap:wrap;color:var(--mute);font-size:14px;margin-top:12px}
+.key i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-inline-end:6px}
+.spec{font-size:14px;color:var(--mute)}
+.spec b{color:var(--text)}
+.spec a,footer a{color:var(--accent)}
+.note{font-size:13px;color:var(--mute);margin-top:10px}
+footer{margin-top:26px;color:var(--mute);font-size:14px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1 data-t="title">Safe Zone Checker</h1>
+      <p class="sub" data-t="sub">Drop in a video or image and see which parts TikTok, Reels and Shorts cover with buttons and captions. Nothing is uploaded: the file stays in your browser.</p>
+    </div>
+    <button id="lang" aria-label="Switch language">العربية</button>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="stage" id="stage">
+        <canvas id="c" width="1080" height="1920"></canvas>
+        <div class="drop" id="drop">
+          <strong data-t="dropTitle">Drop a video or image here</strong>
+          <span data-t="dropSub">9:16 works best. MP4, MOV, PNG, JPG or WebP.</span>
+          <button class="primary" id="pick" data-t="choose">Choose a file</button>
+        </div>
+      </div>
+      <input type="file" id="file" accept="image/*,video/*" hidden>
+      <div class="panel" id="vid" hidden style="margin-top:12px">
+        <div class="row"><button id="play" data-t="pause">Pause</button></div>
+        <label class="rng"><span data-t="time">Time</span><input type="range" id="seek" min="0" max="1000" value="0"></label>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2 data-t="platform">Platform</h2>
+        <div class="row" id="plats">
+          <button data-p="tiktok" aria-pressed="true">TikTok</button>
+          <button data-p="reels" aria-pressed="false">Instagram Reels</button>
+          <button data-p="shorts" aria-pressed="false">YouTube Shorts</button>
+        </div>
+        <div style="margin-top:12px">
+          <h2 data-t="zone">Which zone</h2>
+          <div class="row">
+            <button data-m="app" aria-pressed="true" data-t="mApp">Normal post (real app)</button>
+            <button data-m="ads" aria-pressed="false" data-t="mAds">Ad (published zone)</button>
+          </div>
+        </div>
+        <div id="dirs" style="margin-top:12px">
+          <h2 data-t="layout">TikTok layout</h2>
+          <div class="row">
+            <button data-d="ltr" aria-pressed="true" data-t="ltr">Standard</button>
+            <button data-d="rtl" aria-pressed="false" data-t="rtl">Arabic (right to left)</button>
+          </div>
+        </div>
+        <label class="rng"><span data-t="strength">Overlay</span><input type="range" id="alpha" min="15" max="85" value="55"></label>
+        <div class="key"><span><i style="background:var(--bad)"></i><span data-t="keyBad">May be covered by the app</span></span><span><i style="border:2px dashed var(--accent)"></i><span data-t="keyOk">Safe area: keep text and logos here</span></span></div>
+      </div>
+
+      <div class="panel">
+        <h2 data-t="spec">What this overlay uses</h2>
+        <p class="spec" id="specText"></p>
+        <p class="note" id="specNote"></p>
+      </div>
+
+      <div class="panel">
+        <h2 data-t="save">Save</h2>
+        <div class="row">
+          <button id="dlShot" disabled data-t="dlShot">Download this preview</button>
+          <button id="dlOverlay" data-t="dlOverlay">Download the overlay only (PNG)</button>
+        </div>
+        <p class="note" data-t="saveNote">The overlay PNG is 1080 x 1920 with a transparent safe area, ready to lay over your video in any editor.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer><span data-t="by">Made by</span> <a href="https://codefolio.dev" rel="noopener">Abdel Ahzab</a>. <span data-t="free">Free to use.</span></footer>
+</div>
+
+<script>
+// Safe areas as fractions of a 9:16 frame. Each comes from the platform's own published spec.
+const ZONES = {
+  tiktok: {
+    // Measured on a real post: iPhone with a 1284 x 2778 screen, TikTok app, 30 Sep 2026. The video is fitted to the
+    // screen width; the search bar covers the top 5%, the name and caption start at 88.5% and the button column
+    // sits right of 88% from 47.7% down. Rounded outward by about a point.
+    app: { x0: .03, x1: .97, y0: .06, y1: .87, cut: { w: .11, y: .46 } },
+    // TikTok Ads Manager "In-Feed" safe zone files (720 x 1280 base): sides 80, top 160, bottom 440,
+    // and the action column, 120 wide and 720 tall from the bottom edge. The RTL file mirrors the column.
+    ads: { x0: 80/720, x1: 640/720, y0: 160/1280, y1: 840/1280, cut: { w: 120/720, y: 560/1280 } },
+    src: 'https://ads.tiktok.com/help/article/tiktok-auction-in-feed-ads' },
+  // app: measured on a real Reel, same iPhone, 30 Sep 2026. Instagram fills the screen height, so about 4.4% of
+  // each side is cropped off; back and camera buttons reach 9% from the top, the name and caption start at 90%,
+  // and the button column sits between 86% and 93% across from 67% down.
+  // ads: Meta Ads Guide, Instagram Reels: 14% top, 35% bottom, 6% each side.
+  reels: { app: { x0: .05, x1: .95, y0: .10, y1: .89, cut: { w: .10, y: .66 } }, ads: { x0: .06, x1: .94, y0: .14, y1: .65 },
+    src: 'https://www.facebook.com/business/ads-guide/update/video/instagram-reels' },
+  // Google Ads Help "Universal safe zones for video ads on YouTube", vertical template. Not yet measured on a phone.
+  shorts: { app: null, ads: { x0: 48/1080, x1: 888/1080, y0: 289/1920, y1: 1247/1920 },
+    src: 'https://support.google.com/google-ads/answer/13547298' }
+};
+const T = {
+  en: { title:'Safe Zone Checker', sub:'Drop in a video or image and see which parts TikTok, Reels and Shorts cover with buttons and captions. Nothing is uploaded: the file stays in your browser.',
+    dropTitle:'Drop a video or image here', dropSub:'9:16 works best. MP4, MOV, PNG, JPG or WebP.', choose:'Choose a file', pause:'Pause', play:'Play', time:'Time',
+    platform:'Platform', zone:'Which zone', mApp:'Normal post (real app)', mAds:'Ad (published zone)', layout:'TikTok layout', ltr:'Standard', rtl:'Arabic (right to left)', strength:'Overlay',
+    keyBad:'May be covered by the app', keyOk:'Safe area: keep text and logos here', spec:'What this overlay uses',
+    nApp:'Measured on a real post in the app on an iPhone, 30 September 2026. Other phones and a longer caption can shift it slightly. TikTok\'s Arabic layout is the same measurement mirrored.', nAds:'This is the zone the platform publishes for ads. It is wider than what a normal post covers.', nNone:'Not measured on a phone yet for this platform, so this shows the published ad zone, which is wider than what a normal post covers.',
+    save:'Save', dlShot:'Download this preview', dlOverlay:'Download the overlay only (PNG)',
+    saveNote:'The overlay PNG is 1080 x 1920 with a transparent safe area, ready to lay over your video in any editor.',
+    by:'Made by', free:'Free to use.', source:'Source', other:'العربية',
+    s_tiktok_app:'<b>TikTok, normal post:</b> the top 6% and the bottom 13% are covered, plus the button column on the right from the middle down (on the left in the Arabic layout).',
+    s_tiktok:'<b>TikTok, ad:</b> keep clear 12.5% at the top, 34.4% at the bottom and 11.1% on each side, plus the button column on the right (on the left in the Arabic layout).',
+    s_reels_app:'<b>Instagram Reels, normal post:</b> the top 10% and the bottom 11% are covered, about 5% of each side is cropped off on a tall phone, and the button column sits on the right from two thirds down.',
+    s_reels:'<b>Instagram Reels, ad:</b> keep clear 14% at the top, 35% at the bottom and 6% on each side.',
+    s_shorts:'<b>YouTube Shorts:</b> keep clear 15% at the top, 35% at the bottom, 4.4% on the left and 17.8% on the right.' },
+  ar: { title:'فاحص المنطقة الآمنة', sub:'ضع فيديو أو صورة لترى الأجزاء التي تغطيها أزرار وتعليقات تيك توك وريلز وشورتس. لا يُرفع أي ملف: يبقى الملف في متصفحك.',
+    dropTitle:'اسحب فيديو أو صورة إلى هنا', dropSub:'مقاس 9:16 هو الأنسب. ‏MP4 أو MOV أو PNG أو JPG أو WebP.', choose:'اختر ملفًا', pause:'إيقاف مؤقت', play:'تشغيل', time:'الوقت',
+    platform:'المنصة', zone:'أي منطقة', mApp:'منشور عادي (التطبيق الفعلي)', mAds:'إعلان (المنطقة المنشورة)', layout:'واجهة تيك توك', ltr:'العادية', rtl:'العربية (من اليمين إلى اليسار)', strength:'الغطاء',
+    keyBad:'قد يغطيه التطبيق', keyOk:'المنطقة الآمنة: ضع النص والشعار هنا', spec:'ما يعتمد عليه هذا الغطاء',
+    nApp:'مقيسة على منشور حقيقي داخل التطبيق على آيفون، 30 سبتمبر 2026. قد تختلف قليلًا على هواتف أخرى أو مع وصف أطول. واجهة تيك توك العربية هي القياس نفسه معكوسًا.', nAds:'هذه هي المنطقة التي تنشرها المنصة للإعلانات، وهي أوسع مما يغطيه المنشور العادي.', nNone:'لم تُقَس هذه المنصة على هاتف بعد، لذلك يظهر هنا نطاق الإعلانات المنشور، وهو أوسع مما يغطيه المنشور العادي.',
+    save:'حفظ', dlShot:'نزّل هذه المعاينة', dlOverlay:'نزّل الغطاء فقط (PNG)',
+    saveNote:'ملف الغطاء بمقاس 1080 × 1920 ومنطقته الآمنة شفافة، جاهز لوضعه فوق الفيديو في أي برنامج مونتاج.',
+    by:'من إعداد', free:'مجاني.', source:'المصدر', other:'English',
+    s_tiktok_app:'<b>تيك توك، منشور عادي:</b> يُغطّى 6% من الأعلى و13% من الأسفل، مع عمود الأزرار على اليمين من المنتصف إلى الأسفل (وعلى اليسار في الواجهة العربية).',
+    s_tiktok:'<b>تيك توك، إعلان:</b> اترك 12.5% من الأعلى و34.4% من الأسفل و11.1% من كل جانب، مع عمود الأزرار على اليمين (وعلى اليسار في الواجهة العربية).',
+    s_reels_app:'<b>إنستغرام ريلز، منشور عادي:</b> يُغطّى 10% من الأعلى و11% من الأسفل، ويُقصّ نحو 5% من كل جانب على الهواتف الطويلة، وعمود الأزرار على اليمين من الثلثين إلى الأسفل.',
+    s_reels:'<b>إنستغرام ريلز، إعلان:</b> اترك 14% من الأعلى و35% من الأسفل و6% من كل جانب.',
+    s_shorts:'<b>يوتيوب شورتس:</b> اترك 15% من الأعلى و35% من الأسفل و4.4% من اليسار و17.8% من اليمين.' }
+};
+const $ = s => document.querySelector(s);
+const c = $('#c'), ctx = c.getContext('2d'), W = 1080, H = 1920;
+const state = { plat: 'tiktok', mode: 'app', dir: 'ltr', alpha: .55, media: null, video: null, lang: 'en' };
+
+function safePath(g, z, dir) {
+  const x0 = z.x0 * W, x1 = z.x1 * W, y0 = z.y0 * H, y1 = z.y1 * H;
+  g.beginPath();
+  if (!z.cut) { g.rect(x0, y0, x1 - x0, y1 - y0); return; }
+  const cw = z.cut.w * W, cy = z.cut.y * H;
+  if (dir === 'rtl') { g.moveTo(x0, y0); g.lineTo(x1, y0); g.lineTo(x1, y1); g.lineTo(x0 + cw, y1); g.lineTo(x0 + cw, cy); g.lineTo(x0, cy); }
+  else { g.moveTo(x0, y0); g.lineTo(x1, y0); g.lineTo(x1, cy); g.lineTo(x1 - cw, cy); g.lineTo(x1 - cw, y1); g.lineTo(x0, y1); }
+  g.closePath();
+}
+function zone() { const p = ZONES[state.plat]; return (state.mode === 'app' && p.app) || p.ads; }
+function drawOverlay(g, alpha) {
+  const z = zone();
+  g.save();
+  g.fillStyle = `rgba(255,77,94,${alpha})`;
+  // everything outside the safe area
+  safePath(g, z, state.dir);
+  g.rect(0, 0, W, H);
+  g.fill('evenodd');
+  safePath(g, z, state.dir);
+  g.setLineDash([22, 14]); g.lineWidth = 6; g.strokeStyle = '#25d0a5'; g.stroke();
+  g.restore();
+}
+function drawMedia() {
+  ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, W, H);
+  const m = state.media; if (!m) return;
+  const mw = m.videoWidth || m.naturalWidth, mh = m.videoHeight || m.naturalHeight; if (!mw) return;
+  const s = Math.max(W / mw, H / mh), dw = mw * s, dh = mh * s;   // cover, the way the apps fill the screen
+  ctx.drawImage(m, (W - dw) / 2, (H - dh) / 2, dw, dh);
+}
+function render() { drawMedia(); drawOverlay(ctx, state.alpha); }
+function loop() { if (state.video && !state.video.paused) { render(); $('#seek').value = Math.round(state.video.currentTime / (state.video.duration || 1) * 1000); } requestAnimationFrame(loop); }
+
+function load(file) {
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  if (state.video) { state.video.pause(); state.video = null; }
+  if (file.type.startsWith('video')) {
+    const v = document.createElement('video'); v.muted = true; v.loop = true; v.playsInline = true; v.src = url;
+    v.addEventListener('loadeddata', () => { state.media = v; state.video = v; v.play(); $('#vid').hidden = false; ready(); });
+    v.addEventListener('seeked', render);
+  } else {
+    const i = new Image(); i.onload = () => { state.media = i; $('#vid').hidden = true; ready(); }; i.src = url;
+  }
+}
+function ready() { $('#drop').hidden = true; $('#dlShot').disabled = false; render(); }
+function download(canvas, name) { const a = document.createElement('a'); a.download = name; a.href = canvas.toDataURL('image/png'); a.click(); }
+
+function text() {
+  const t = T[state.lang];
+  document.documentElement.lang = state.lang; document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-t]').forEach(e => { e.textContent = t[e.dataset.t]; });
+  $('#lang').textContent = t.other;
+  $('#play').textContent = state.video && state.video.paused ? t.play : t.pause;
+  const real = state.mode === 'app' && ZONES[state.plat].app;
+  $('#specNote').textContent = real ? t.nApp : (state.mode === 'app' ? t.nNone : t.nAds);
+  $('#specText').innerHTML = real ? t['s_' + state.plat + '_app'] : t['s_' + state.plat] + ' <a href="' + ZONES[state.plat].src + '" target="_blank" rel="noopener">' + t.source + '</a>';
+  document.title = t.title;
+}
+function press(sel, attr, val) { document.querySelectorAll(sel).forEach(b => b.setAttribute('aria-pressed', b.dataset[attr] === val)); }
+
+$('#pick').onclick = () => $('#file').click();
+$('#file').onchange = e => load(e.target.files[0]);
+const stage = $('#stage');
+['dragenter', 'dragover'].forEach(n => stage.addEventListener(n, e => { e.preventDefault(); stage.classList.add('over'); }));
+['dragleave', 'drop'].forEach(n => stage.addEventListener(n, e => { e.preventDefault(); stage.classList.remove('over'); }));
+stage.addEventListener('drop', e => load(e.dataTransfer.files[0]));
+document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { state.plat = b.dataset.p; press('[data-p]', 'p', state.plat); $('#dirs').hidden = state.plat !== 'tiktok'; text(); render(); });
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { state.mode = b.dataset.m; press('[data-m]', 'm', state.mode); text(); render(); });
+document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { state.dir = b.dataset.d; press('[data-d]', 'd', state.dir); render(); });
+$('#alpha').oninput = e => { state.alpha = e.target.value / 100; render(); };
+$('#play').onclick = () => { const v = state.video; if (!v) return; v.paused ? v.play() : v.pause(); text(); };
+$('#seek').oninput = e => { const v = state.video; if (!v) return; v.pause(); v.currentTime = e.target.value / 1000 * (v.duration || 0); text(); };
+$('#dlShot').onclick = () => download(c, 'safe-zone-' + state.plat + '.png');
+$('#dlOverlay').onclick = () => { const o = document.createElement('canvas'); o.width = W; o.height = H; const keep = state.alpha; drawOverlay(o.getContext('2d'), .55); state.alpha = keep; download(o, 'overlay-' + state.plat + '-' + (state.mode === 'app' && ZONES[state.plat].app ? 'post' : 'ad') + (state.plat === 'tiktok' ? '-' + state.dir : '') + '.png'); };
+$('#lang').onclick = () => { state.lang = state.lang === 'en' ? 'ar' : 'en'; if (state.lang === 'ar' && state.plat === 'tiktok' && state.dir === 'ltr') { state.dir = 'rtl'; press('[data-d]', 'd', 'rtl'); render(); } text(); };
+text(); render(); loop();
+</script>
+</body>
+</html>
