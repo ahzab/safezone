@@ -10,6 +10,7 @@ See which parts of a vertical video TikTok, Instagram Reels and YouTube Shorts c
 - The page is in English and Arabic.
 - You can download the preview, or a transparent 1080 x 1920 overlay to use in any editor.
 - Nothing is uploaded. The file you pick stays in your browser.
+- The live site counts visits and button use with Google Analytics; it never sends file names or contents. Remove the two `gtag` script tags in `index.html` to run it without.
 
 ## Why another safe zone tool
 

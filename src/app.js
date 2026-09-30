@@ -11,6 +11,11 @@ const OUTLINE = '#FFD60A';
 const EMPTY_SCREEN = '#2A1F5C';
 const EXPORT_ALPHA = 0.55;
 
+/** Report a usage event to Google Analytics when it is loaded. Never includes file names or contents. */
+function track(name, params = {}) {
+  if (typeof window.gtag === 'function') window.gtag('event', name, params);
+}
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
@@ -116,6 +121,7 @@ function loadFile(file) {
 }
 
 function showMedia(isVideo) {
+  track('file_loaded', { kind: isVideo ? 'video' : 'image' });
   $('#drop').hidden = true;
   $('#vid').hidden = !isVideo;
   $('#dlShot').disabled = false;
@@ -196,6 +202,7 @@ function bindChoice(selector, key, apply) {
 
 bindChoice('[data-p]', 'p', (value) => {
   state.platform = value;
+  track('platform_selected', { platform: value });
   $('#dirs').hidden = !ZONES[value].mirrors;
 });
 bindChoice('[data-m]', 'm', (value) => {
@@ -249,7 +256,10 @@ $('#seek').addEventListener('input', (event) => {
   updateText();
 });
 
-$('#dlShot').addEventListener('click', () => downloadPng(canvas, `safe-zone-${state.platform}.png`));
+$('#dlShot').addEventListener('click', () => {
+  track('download', { what: 'preview', platform: state.platform });
+  downloadPng(canvas, `safe-zone-${state.platform}.png`);
+});
 
 $('#dlOverlay').addEventListener('click', () => {
   const overlay = document.createElement('canvas');
@@ -258,11 +268,13 @@ $('#dlOverlay').addEventListener('click', () => {
   drawOverlay(overlay.getContext('2d'), EXPORT_ALPHA);
   const kind = state.mode === 'app' && isMeasured(state.platform) ? 'post' : 'ad';
   const side = ZONES[state.platform].mirrors ? `-${state.dir}` : '';
+  track('download', { what: 'overlay', platform: state.platform });
   downloadPng(overlay, `overlay-${state.platform}-${kind}${side}.png`);
 });
 
 $('#lang').addEventListener('click', () => {
   state.lang = state.lang === 'en' ? 'ar' : 'en';
+  track('language_switched', { language: state.lang });
   // An Arabic speaker most likely runs TikTok in Arabic, so start them on that layout.
   if (state.lang === 'ar' && state.dir === 'ltr') {
     state.dir = 'rtl';
