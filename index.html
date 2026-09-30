@@ -3,114 +3,109 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Safe Zone Checker for TikTok, Reels and Shorts (with the Arabic layout)</title>
-<meta name="description" content="Drop in a video or image and see which parts TikTok, Instagram Reels and YouTube Shorts cover. Includes TikTok's Arabic right-to-left layout. Free, nothing is uploaded.">
+<title>Safe Zone Checker for TikTok, Reels and Shorts</title>
+<meta name="description" content="Drop in a video or image and see which parts TikTok, Instagram Reels and YouTube Shorts cover. Measured on a real phone, with TikTok's Arabic layout. Free, nothing is uploaded.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
-:root{--bg:#0e1116;--panel:#171b22;--line:#2a303a;--text:#e9edf3;--mute:#98a2b3;--accent:#25d0a5;--bad:#ff4d5e}
+:root{--ground:#F1EEFF;--ink:#1A1433;--surface:#FFFFFF;--mute:#4A4466;--accent:#FFD60A;--covered:#FF3D7F;--video:#2A1F5C}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,Arial,sans-serif;line-height:1.45}
-.wrap{max-width:1060px;margin:0 auto;padding:22px 16px 60px}
-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
-h1{font-size:clamp(22px,3.4vw,32px);line-height:1.15;letter-spacing:-.5px}
-.sub{color:var(--mute);margin-top:6px;max-width:60ch}
-button,.btn{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 14px;cursor:pointer}
-button:hover,.btn:hover{border-color:#47505e}
-button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#06251d;font-weight:700}
-button.primary{background:var(--accent);border-color:var(--accent);color:#06251d;font-weight:700}
-button:disabled{opacity:.45;cursor:not-allowed}
-.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:22px;align-items:start}
-@media (max-width:760px){.grid{grid-template-columns:1fr}}
-.stage{position:relative;aspect-ratio:9/16;background:#05070a;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+body{background:var(--ground);color:var(--ink);font-family:"DM Sans","Noto Sans Arabic",Tahoma,system-ui,sans-serif;line-height:1.45}
+.wrap{max-width:1440px;margin:0 auto;padding:28px clamp(18px,4vw,56px) 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:clamp(20px,4vw,44px)}
+.brand{display:flex;align-items:center;gap:12px;font-family:"Bricolage Grotesque","Noto Sans Arabic",sans-serif;font-weight:800;font-size:24px;letter-spacing:-.5px}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--ink);display:flex;align-items:center;justify-content:center}
+.top{display:flex;align-items:center;gap:12px;color:var(--mute);font-size:15px}
+button{font:inherit;color:var(--ink);cursor:pointer}
+.pill{min-height:48px;padding:0 20px;border-radius:999px;border:2px solid var(--ink);background:var(--surface);font-size:16px;font-weight:700}
+.pill:hover{background:#ece7ff}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
+.soft .pill[aria-pressed="true"]{background:var(--accent);color:var(--ink)}
+.pill.ghost{background:transparent}
+.pill:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:minmax(0,430px) 340px minmax(0,1fr);gap:48px;align-items:center}
+.hero{display:flex;flex-direction:column;gap:22px}
+.badge{align-self:flex-start;background:var(--accent);font-weight:700;font-size:14px;letter-spacing:.4px;padding:8px 14px;border-radius:999px;transform:rotate(-2deg)}
+h1{font-family:"Bricolage Grotesque","Noto Sans Arabic",sans-serif;font-weight:800;font-size:clamp(40px,5.2vw,72px);line-height:.98;letter-spacing:-.03em}
+.sub{font-size:19px;color:var(--mute)}
+.cta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:15px}
+.primary{min-height:56px;padding:0 26px;border-radius:999px;border:none;background:var(--ink);color:var(--ground);font-size:17px;font-weight:700;display:flex;align-items:center;gap:10px}
+.primary:hover{background:#2c2357}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{padding:10px 14px;border-radius:14px;background:var(--surface);border:1.5px solid var(--ink);font-size:14px}
+.phonecol{display:flex;flex-direction:column;align-items:center;gap:14px}
+.phone{width:100%;max-width:324px;border-radius:36px;background:var(--ink);padding:9px;box-shadow:10px 10px 0 var(--accent)}
+.stage{position:relative;aspect-ratio:9/16;border-radius:28px;overflow:hidden;background:var(--video)}
+.stage.over{outline:4px dashed var(--accent);outline-offset:-10px}
 canvas{width:100%;height:100%;display:block}
-.drop{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;color:var(--mute)}
-.drop strong{color:var(--text);font-size:18px}
-.stage.over{outline:3px dashed var(--accent);outline-offset:-8px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
-.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--mute);margin-bottom:10px}
-.row{display:flex;flex-wrap:wrap;gap:8px}
-label.rng{display:flex;align-items:center;gap:10px;color:var(--mute);margin-top:12px}
-input[type=range]{flex:1;accent-color:var(--accent)}
-.key{display:flex;gap:16px;flex-wrap:wrap;color:var(--mute);font-size:14px;margin-top:12px}
-.key i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-inline-end:6px}
-.spec{font-size:14px;color:var(--mute)}
-.spec b{color:var(--text)}
-.spec a,footer a{color:var(--accent)}
-.note{font-size:13px;color:var(--mute);margin-top:10px}
-footer{margin-top:26px;color:var(--mute);font-size:14px}
+.drop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;font-family:"Bricolage Grotesque","Noto Sans Arabic",sans-serif;font-weight:800;font-size:30px;line-height:1.05;pointer-events:none}
+.key{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;color:var(--mute);font-size:14px;margin-top:10px}
+.key i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-inline-end:7px}
+.vid{width:100%;max-width:324px;display:flex;align-items:center;gap:10px}
+.vid input{flex:1}
+.side{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:2px solid var(--ink);border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:22px;box-shadow:8px 8px 0 var(--ink)}
+.group{display:flex;flex-direction:column;gap:10px}
+.lab{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mute)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input[type=range]{width:100%;height:44px;accent-color:var(--ink)}
+.dl{display:flex;gap:10px;flex-wrap:wrap}
+.dl .pill{flex:1;min-height:56px}
+.dl .pill.yes{background:var(--accent)}
+.note{font-size:14px;color:var(--mute)}
+a{color:var(--ink)}a:hover{color:#B3243F}
 [hidden]{display:none!important}
+@media (max-width:1100px){.grid{grid-template-columns:1fr;gap:28px}.hero{text-align:start}.card{box-shadow:6px 6px 0 var(--ink)}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1 data-t="title">Safe Zone Checker</h1>
-      <p class="sub" data-t="sub">Drop in a video or image and see which parts TikTok, Reels and Shorts cover with buttons and captions. Nothing is uploaded: the file stays in your browser.</p>
-    </div>
-    <button id="lang" aria-label="Switch language">العربية</button>
+    <div class="brand"><span class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD60A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="3"></rect><path d="M9.5 8h5M9.5 12h5"></path></svg></span>safezone</div>
+    <div class="top"><span data-t="free">Free. Nothing is uploaded.</span><button class="pill ghost" id="lang" aria-label="Switch language">العربية</button></div>
   </header>
 
   <div class="grid">
-    <div>
-      <div class="stage" id="stage">
-        <canvas id="c" width="1080" height="1920"></canvas>
-        <div class="drop" id="drop">
-          <strong data-t="dropTitle">Drop a video or image here</strong>
-          <span data-t="dropSub">9:16 works best. MP4, MOV, PNG, JPG or WebP.</span>
-          <button class="primary" id="pick" data-t="choose">Choose a file</button>
-        </div>
+    <div class="hero">
+      <span class="badge" id="badge">Measured on a real phone</span>
+      <h1 data-t="title">Is your text hiding behind the buttons?</h1>
+      <p class="sub" data-t="sub">Drop in your video or cover. See what TikTok, Reels and Shorts put on top of it before you post.</p>
+      <div class="cta">
+        <button class="primary" id="pick"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"></path></svg><span data-t="choose">Choose a video or image</span></button>
+        <span data-t="orDrop">or drop it on the phone</span>
       </div>
-      <input type="file" id="file" accept="image/*,video/*" hidden>
-      <div class="panel" id="vid" hidden style="margin-top:12px">
-        <div class="row"><button id="play" data-t="pause">Pause</button></div>
-        <label class="rng"><span data-t="time">Time</span><input type="range" id="seek" min="0" max="1000" value="0"></label>
-      </div>
+      <div class="chips" id="chips"></div>
     </div>
 
-    <div>
-      <div class="panel">
-        <h2 data-t="platform">Platform</h2>
-        <div class="row" id="plats">
-          <button data-p="tiktok" aria-pressed="true">TikTok</button>
-          <button data-p="reels" aria-pressed="false">Instagram Reels</button>
-          <button data-p="shorts" aria-pressed="false">YouTube Shorts</button>
-        </div>
-        <div style="margin-top:12px">
-          <h2 data-t="zone">Which zone</h2>
-          <div class="row">
-            <button data-m="app" aria-pressed="true" data-t="mApp">Normal post (real app)</button>
-            <button data-m="ads" aria-pressed="false" data-t="mAds">Ad (published zone)</button>
-          </div>
-        </div>
-        <div id="dirs" style="margin-top:12px">
-          <h2 data-t="layout">TikTok layout</h2>
-          <div class="row">
-            <button data-d="ltr" aria-pressed="true" data-t="ltr">Standard</button>
-            <button data-d="rtl" aria-pressed="false" data-t="rtl">Arabic (right to left)</button>
-          </div>
-        </div>
-        <label class="rng"><span data-t="strength">Overlay</span><input type="range" id="alpha" min="15" max="85" value="55"></label>
-        <div class="key"><span><i style="background:var(--bad)"></i><span data-t="keyBad">May be covered by the app</span></span><span><i style="border:2px dashed var(--accent)"></i><span data-t="keyOk">Safe area: keep text and logos here</span></span></div>
+    <div class="phonecol">
+      <div class="phone"><div class="stage" id="stage">
+        <canvas id="c" width="1080" height="1920"></canvas>
+        <div class="drop" id="drop" data-t="dropTitle">Drop your video here</div>
+      </div></div>
+      <input type="file" id="file" accept="image/*,video/*" hidden>
+      <div class="vid" id="vid" hidden>
+        <button class="pill" id="play">Pause</button>
+        <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Time">
       </div>
+      <div class="key"><span><i style="background:var(--covered)"></i><span data-t="keyBad">Covered by the app</span></span><span><i style="border:2px dashed var(--ink)"></i><span data-t="keyOk">Safe</span></span></div>
+    </div>
 
-      <div class="panel">
-        <h2 data-t="spec">What this overlay uses</h2>
-        <p class="spec" id="specText"></p>
-        <p class="note" id="specNote"></p>
+    <div class="side">
+      <div class="card">
+        <div class="group"><div class="lab" data-t="platform">Where are you posting?</div>
+          <div class="row"><button class="pill" data-p="tiktok" aria-pressed="true">TikTok</button><button class="pill" data-p="reels" aria-pressed="false">Reels</button><button class="pill" data-p="shorts" aria-pressed="false">Shorts</button></div></div>
+        <div class="group soft"><div class="lab" data-t="zone">What kind of post?</div>
+          <div class="row"><button class="pill" data-m="app" aria-pressed="true" data-t="mApp">Normal post</button><button class="pill" data-m="ads" aria-pressed="false" data-t="mAds">Ad</button></div></div>
+        <div class="group soft" id="dirs"><div class="lab" data-t="layout">App language</div>
+          <div class="row"><button class="pill" data-d="ltr" aria-pressed="true" data-t="ltr">Standard</button><button class="pill" data-d="rtl" aria-pressed="false" data-t="rtl">Arabic, buttons on the left</button></div></div>
+        <div class="group"><label class="lab" for="alpha" data-t="strength">Overlay strength</label>
+          <input type="range" id="alpha" min="15" max="85" value="55"></div>
       </div>
-
-      <div class="panel">
-        <h2 data-t="save">Save</h2>
-        <div class="row">
-          <button id="dlShot" disabled data-t="dlShot">Download this preview</button>
-          <button id="dlOverlay" data-t="dlOverlay">Download the overlay only (PNG)</button>
-        </div>
-        <p class="note" data-t="saveNote">The overlay PNG is 1080 x 1920 with a transparent safe area, ready to lay over your video in any editor.</p>
-      </div>
+      <div class="dl"><button class="pill yes" id="dlShot" disabled data-t="dlShot">Download this preview</button><button class="pill" id="dlOverlay" data-t="dlOverlay">Download the overlay</button></div>
+      <p class="note"><span id="specNote"></span> <span data-t="by">Made by</span> <a href="https://codefolio.dev" rel="noopener">Abdel Ahzab</a>.</p>
     </div>
   </div>
-
-  <footer><span data-t="by">Made by</span> <a href="https://codefolio.dev" rel="noopener">Abdel Ahzab</a>. <span data-t="free">Free to use.</span></footer>
 </div>
 
 <script>
@@ -136,32 +131,26 @@ const ZONES = {
     src: 'https://support.google.com/google-ads/answer/13547298' }
 };
 const T = {
-  en: { title:'Safe Zone Checker', sub:'Drop in a video or image and see which parts TikTok, Reels and Shorts cover with buttons and captions. Nothing is uploaded: the file stays in your browser.',
-    dropTitle:'Drop a video or image here', dropSub:'9:16 works best. MP4, MOV, PNG, JPG or WebP.', choose:'Choose a file', pause:'Pause', play:'Play', time:'Time',
-    platform:'Platform', zone:'Which zone', mApp:'Normal post (real app)', mAds:'Ad (published zone)', layout:'TikTok layout', ltr:'Standard', rtl:'Arabic (right to left)', strength:'Overlay',
-    keyBad:'May be covered by the app', keyOk:'Safe area: keep text and logos here', spec:'What this overlay uses',
-    nApp:'Measured on a real post in the app on an iPhone, 30 September 2026. Other phones and a longer caption can shift it slightly. TikTok\'s Arabic layout is the same measurement mirrored.', nAds:'This is the zone the platform publishes for ads. It is wider than what a normal post covers.', nNone:'Not measured on a phone yet for this platform, so this shows the published ad zone, which is wider than what a normal post covers.',
-    save:'Save', dlShot:'Download this preview', dlOverlay:'Download the overlay only (PNG)',
-    saveNote:'The overlay PNG is 1080 x 1920 with a transparent safe area, ready to lay over your video in any editor.',
-    by:'Made by', free:'Free to use.', source:'Source', other:'العربية',
-    s_tiktok_app:'<b>TikTok, normal post:</b> the top 6% and the bottom 13% are covered, plus the button column on the right from the middle down (on the left in the Arabic layout).',
-    s_tiktok:'<b>TikTok, ad:</b> keep clear 12.5% at the top, 34.4% at the bottom and 11.1% on each side, plus the button column on the right (on the left in the Arabic layout).',
-    s_reels_app:'<b>Instagram Reels, normal post:</b> the top 10% and the bottom 11% are covered, about 5% of each side is cropped off on a tall phone, and the button column sits on the right from two thirds down.',
-    s_reels:'<b>Instagram Reels, ad:</b> keep clear 14% at the top, 35% at the bottom and 6% on each side.',
-    s_shorts:'<b>YouTube Shorts:</b> keep clear 15% at the top, 35% at the bottom, 4.4% on the left and 17.8% on the right.' },
-  ar: { title:'فاحص المنطقة الآمنة', sub:'ضع فيديو أو صورة لترى الأجزاء التي تغطيها أزرار وتعليقات تيك توك وريلز وشورتس. لا يُرفع أي ملف: يبقى الملف في متصفحك.',
-    dropTitle:'اسحب فيديو أو صورة إلى هنا', dropSub:'مقاس 9:16 هو الأنسب. ‏MP4 أو MOV أو PNG أو JPG أو WebP.', choose:'اختر ملفًا', pause:'إيقاف مؤقت', play:'تشغيل', time:'الوقت',
-    platform:'المنصة', zone:'أي منطقة', mApp:'منشور عادي (التطبيق الفعلي)', mAds:'إعلان (المنطقة المنشورة)', layout:'واجهة تيك توك', ltr:'العادية', rtl:'العربية (من اليمين إلى اليسار)', strength:'الغطاء',
-    keyBad:'قد يغطيه التطبيق', keyOk:'المنطقة الآمنة: ضع النص والشعار هنا', spec:'ما يعتمد عليه هذا الغطاء',
-    nApp:'مقيسة على منشور حقيقي داخل التطبيق على آيفون، 30 سبتمبر 2026. قد تختلف قليلًا على هواتف أخرى أو مع وصف أطول. واجهة تيك توك العربية هي القياس نفسه معكوسًا.', nAds:'هذه هي المنطقة التي تنشرها المنصة للإعلانات، وهي أوسع مما يغطيه المنشور العادي.', nNone:'لم تُقَس هذه المنصة على هاتف بعد، لذلك يظهر هنا نطاق الإعلانات المنشور، وهو أوسع مما يغطيه المنشور العادي.',
-    save:'حفظ', dlShot:'نزّل هذه المعاينة', dlOverlay:'نزّل الغطاء فقط (PNG)',
-    saveNote:'ملف الغطاء بمقاس 1080 × 1920 ومنطقته الآمنة شفافة، جاهز لوضعه فوق الفيديو في أي برنامج مونتاج.',
-    by:'من إعداد', free:'مجاني.', source:'المصدر', other:'English',
-    s_tiktok_app:'<b>تيك توك، منشور عادي:</b> يُغطّى 6% من الأعلى و13% من الأسفل، مع عمود الأزرار على اليمين من المنتصف إلى الأسفل (وعلى اليسار في الواجهة العربية).',
-    s_tiktok:'<b>تيك توك، إعلان:</b> اترك 12.5% من الأعلى و34.4% من الأسفل و11.1% من كل جانب، مع عمود الأزرار على اليمين (وعلى اليسار في الواجهة العربية).',
-    s_reels_app:'<b>إنستغرام ريلز، منشور عادي:</b> يُغطّى 10% من الأعلى و11% من الأسفل، ويُقصّ نحو 5% من كل جانب على الهواتف الطويلة، وعمود الأزرار على اليمين من الثلثين إلى الأسفل.',
-    s_reels:'<b>إنستغرام ريلز، إعلان:</b> اترك 14% من الأعلى و35% من الأسفل و6% من كل جانب.',
-    s_shorts:'<b>يوتيوب شورتس:</b> اترك 15% من الأعلى و35% من الأسفل و4.4% من اليسار و17.8% من اليمين.' }
+  en: { docTitle:'Safe Zone Checker for TikTok, Reels and Shorts', badgeReal:'Measured on a real phone', badgeAd:'Published ad zone',
+    title:'Is your text hiding behind the buttons?', sub:'Drop in your video or cover. See what TikTok, Reels and Shorts put on top of it before you post.',
+    choose:'Choose a video or image', orDrop:'or drop it on the phone', dropTitle:'Drop your video here', free:'Free. Nothing is uploaded.',
+    pause:'Pause', play:'Play', time:'Time', platform:'Where are you posting?', zone:'What kind of post?', mApp:'Normal post', mAds:'Ad',
+    layout:'App language', ltr:'Standard', rtl:'Arabic, buttons on the left', strength:'Overlay strength', keyBad:'Covered by the app', keyOk:'Safe',
+    cTop:'top', cBottom:'bottom', cSide:'each side', cLeft:'left', cRight:'right', cColR:'Buttons on the right', cColL:'Buttons on the left',
+    nApp:'Measured on a real post in the app on an iPhone, 30 September 2026. Other phones and a longer caption can shift it slightly. TikTok\'s Arabic layout is the same measurement mirrored.',
+    nAds:'This is the zone the platform publishes for ads. It is wider than what a normal post covers.',
+    nNone:'Not measured on a phone yet for this platform, so this shows the published ad zone, which is wider than what a normal post covers.',
+    dlShot:'Download this preview', dlOverlay:'Download the overlay', by:'Made by', source:'Source', other:'العربية' },
+  ar: { docTitle:'فاحص المنطقة الآمنة لتيك توك وريلز وشورتس', badgeReal:'مقيسة على هاتف حقيقي', badgeAd:'منطقة الإعلانات المنشورة',
+    title:'هل يختفي نصّك خلف الأزرار؟', sub:'ضع الفيديو أو الغلاف، وشاهد ما يضعه تيك توك وريلز وشورتس فوقه قبل أن تنشر.',
+    choose:'اختر فيديو أو صورة', orDrop:'أو اسحبه إلى الهاتف', dropTitle:'اسحب الفيديو إلى هنا', free:'مجاني. لا يُرفع أي ملف.',
+    pause:'إيقاف مؤقت', play:'تشغيل', time:'الوقت', platform:'أين ستنشر؟', zone:'ما نوع المنشور؟', mApp:'منشور عادي', mAds:'إعلان',
+    layout:'لغة التطبيق', ltr:'العادية', rtl:'العربية، الأزرار على اليسار', strength:'قوة الغطاء', keyBad:'يغطيه التطبيق', keyOk:'آمن',
+    cTop:'من الأعلى', cBottom:'من الأسفل', cSide:'من كل جانب', cLeft:'من اليسار', cRight:'من اليمين', cColR:'الأزرار على اليمين', cColL:'الأزرار على اليسار',
+    nApp:'مقيسة على منشور حقيقي داخل التطبيق على آيفون، 30 سبتمبر 2026. قد تختلف قليلًا على هواتف أخرى أو مع وصف أطول. واجهة تيك توك العربية هي القياس نفسه معكوسًا.',
+    nAds:'هذه هي المنطقة التي تنشرها المنصة للإعلانات، وهي أوسع مما يغطيه المنشور العادي.',
+    nNone:'لم تُقَس هذه المنصة على هاتف بعد، لذلك يظهر هنا نطاق الإعلانات المنشور، وهو أوسع مما يغطيه المنشور العادي.',
+    dlShot:'نزّل هذه المعاينة', dlOverlay:'نزّل الغطاء', by:'من إعداد', source:'المصدر', other:'English' }
 };
 const $ = s => document.querySelector(s);
 const c = $('#c'), ctx = c.getContext('2d'), W = 1080, H = 1920;
@@ -180,17 +169,17 @@ function zone() { const p = ZONES[state.plat]; return (state.mode === 'app' && p
 function drawOverlay(g, alpha) {
   const z = zone();
   g.save();
-  g.fillStyle = `rgba(255,77,94,${alpha})`;
+  g.fillStyle = `rgba(255,61,127,${alpha})`;
   // everything outside the safe area
   safePath(g, z, state.dir);
   g.rect(0, 0, W, H);
   g.fill('evenodd');
   safePath(g, z, state.dir);
-  g.setLineDash([22, 14]); g.lineWidth = 6; g.strokeStyle = '#25d0a5'; g.stroke();
+  g.setLineDash([22, 14]); g.lineWidth = 6; g.strokeStyle = '#FFD60A'; g.stroke();
   g.restore();
 }
 function drawMedia() {
-  ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#2A1F5C'; ctx.fillRect(0, 0, W, H);
   const m = state.media; if (!m) return;
   const mw = m.videoWidth || m.naturalWidth, mh = m.videoHeight || m.naturalHeight; if (!mw) return;
   const s = Math.max(W / mw, H / mh), dw = mw * s, dh = mh * s;   // cover, the way the apps fill the screen
@@ -220,10 +209,14 @@ function text() {
   document.querySelectorAll('[data-t]').forEach(e => { e.textContent = t[e.dataset.t]; });
   $('#lang').textContent = t.other;
   $('#play').textContent = state.video && state.video.paused ? t.play : t.pause;
-  const real = state.mode === 'app' && ZONES[state.plat].app;
-  $('#specNote').textContent = real ? t.nApp : (state.mode === 'app' ? t.nNone : t.nAds);
-  $('#specText').innerHTML = real ? t['s_' + state.plat + '_app'] : t['s_' + state.plat] + ' <a href="' + ZONES[state.plat].src + '" target="_blank" rel="noopener">' + t.source + '</a>';
-  document.title = t.title;
+  const real = state.mode === 'app' && ZONES[state.plat].app, z = zone(), pct = v => (Math.round(v * 1000) / 10) + '%';
+  $('#badge').textContent = real ? t.badgeReal : t.badgeAd;
+  const L = z.x0, R = 1 - z.x1, chips = ['<b>' + pct(z.y0) + '</b> ' + t.cTop, '<b>' + pct(1 - z.y1) + '</b> ' + t.cBottom];
+  if (Math.abs(L - R) < .005) chips.push('<b>' + pct(L) + '</b> ' + t.cSide); else chips.push('<b>' + pct(L) + '</b> ' + t.cLeft, '<b>' + pct(R) + '</b> ' + t.cRight);
+  if (z.cut) chips.push('<b>' + (state.dir === 'rtl' && state.plat === 'tiktok' ? t.cColL : t.cColR) + '</b>');
+  $('#chips').innerHTML = chips.map(c => '<span class="chip">' + c + '</span>').join('');
+  $('#specNote').innerHTML = (real ? t.nApp : (state.mode === 'app' ? t.nNone : t.nAds)) + (real ? '' : ' <a href="' + ZONES[state.plat].src + '" target="_blank" rel="noopener">' + t.source + '</a>');
+  document.title = t.docTitle;
 }
 function press(sel, attr, val) { document.querySelectorAll(sel).forEach(b => b.setAttribute('aria-pressed', b.dataset[attr] === val)); }
 
@@ -235,7 +228,7 @@ const stage = $('#stage');
 stage.addEventListener('drop', e => load(e.dataTransfer.files[0]));
 document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { state.plat = b.dataset.p; press('[data-p]', 'p', state.plat); $('#dirs').hidden = state.plat !== 'tiktok'; text(); render(); });
 document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { state.mode = b.dataset.m; press('[data-m]', 'm', state.mode); text(); render(); });
-document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { state.dir = b.dataset.d; press('[data-d]', 'd', state.dir); render(); });
+document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { state.dir = b.dataset.d; press('[data-d]', 'd', state.dir); text(); render(); });
 $('#alpha').oninput = e => { state.alpha = e.target.value / 100; render(); };
 $('#play').onclick = () => { const v = state.video; if (!v) return; v.paused ? v.play() : v.pause(); text(); };
 $('#seek').oninput = e => { const v = state.video; if (!v) return; v.pause(); v.currentTime = e.target.value / 1000 * (v.duration || 0); text(); };
