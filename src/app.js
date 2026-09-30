@@ -222,6 +222,11 @@ const stage = $('#stage');
   }),
 );
 stage.addEventListener('drop', (event) => loadFile(event.dataTransfer.files[0]));
+// Tapping the phone picks a file while it is empty, and plays or pauses a loaded video.
+stage.addEventListener('click', () => {
+  if (!state.media) $('#file').click();
+  else if (state.video) $('#play').click();
+});
 
 $('#alpha').addEventListener('input', (event) => {
   state.alpha = event.target.value / 100;
