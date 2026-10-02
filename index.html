@@ -21,7 +21,17 @@
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-DWSWVKVDBV');
+// ?internal=1 marks this browser as the maker's own (GA internal-traffic filter); ?internal=0 clears it.
+(function () {
+  var internal = false;
+  try {
+    var flag = new URLSearchParams(location.search).get('internal');
+    if (flag === '1') localStorage.setItem('ga_internal', '1');
+    if (flag === '0') localStorage.removeItem('ga_internal');
+    internal = localStorage.getItem('ga_internal') === '1';
+  } catch (e) { /* storage blocked */ }
+  gtag('config', 'G-DWSWVKVDBV', internal ? { traffic_type: 'internal' } : {});
+})();
 </script>
 </head>
 <body>
